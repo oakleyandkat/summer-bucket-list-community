@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { accounts, personalChecks } from "@/db/schema";
@@ -59,6 +60,18 @@ export default async function Home() {
   return (
     <main className="relative z-10 mx-auto w-full max-w-[960px] px-6 pt-12 pb-20 sm:pt-16">
       <Hero />
+
+      <div className="mb-6 flex flex-wrap items-center justify-center gap-2 text-sm">
+        <span className="rounded-full border-2 border-ink bg-white px-4 py-1.5 font-black text-ink shadow-chunky-sm">
+          🙋 Personal mode
+        </span>
+        <Link
+          href="/rooms"
+          className="rounded-full border-2 border-ink bg-sky px-4 py-1.5 font-black text-ink shadow-chunky-sm transition hover:-translate-y-0.5"
+        >
+          👯 Group rooms →
+        </Link>
+      </div>
 
       <SurpriseMe uncheckedIdeas={uncheckedIdeas} />
 
