@@ -20,6 +20,11 @@ export const metadata: Metadata = {
     "A bucket list for people who have three months of freedom and absolutely no plan. Pick a vibe. Go outside. Or stay in — there are cozy ones too.",
 };
 
+// Every page in this app reads cookies (account session) and/or the DB.
+// Forcing dynamic rendering avoids Next.js trying to pre-render pages
+// at build time when DATABASE_URL isn't a real Postgres URL.
+export const dynamic = "force-dynamic";
+
 export default function RootLayout({
   children,
 }: Readonly<{
