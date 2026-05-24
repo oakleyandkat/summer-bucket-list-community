@@ -4,6 +4,7 @@ import { db } from "@/db/client";
 import { accounts, personalChecks } from "@/db/schema";
 import { getCurrentAccount } from "@/lib/session";
 import { CATEGORIES, IDEAS } from "@/lib/ideas";
+import { describeVibe, moodProfileFromAnswers, sortByVibe } from "@/lib/quiz";
 import { logoutAction } from "./_actions/account";
 import { AccountFlow } from "./_components/AccountFlow";
 import { IdeaCard } from "./_components/IdeaCard";
@@ -54,8 +55,16 @@ export default async function Home() {
     .from(personalChecks)
     .where(eq(personalChecks.accountId, me.id));
   const checked = new Set(checkedRows.map((r) => r.ideaKey));
-  const uncheckedIdeas = IDEAS.filter((i) => !checked.has(i.key));
+  const unchecked = IDEAS.filter((i) => !checked.has(i.key));
   const pct = Math.round((checked.size / IDEAS.length) * 100);
+
+  // Vibe-based ranking (if the user has taken the quiz)
+  const profile = moodProfileFromAnswers(me.quizAnswers);
+  const hasVibe = profile.size > 0;
+  const vibeLabel = hasVibe ? describeVibe(profile) : null;
+  // Sort unchecked by vibe so Surprise Me prefers matches first
+  const vibedUnchecked = hasVibe ? sortByVibe(unchecked, profile) : unchecked;
+  const forYou = hasVibe ? vibedUnchecked.slice(0, 6) : [];
 
   return (
     <main className="relative z-10 mx-auto w-full max-w-[960px] px-6 pt-12 pb-20 sm:pt-16">
@@ -73,7 +82,7 @@ export default async function Home() {
         </Link>
       </div>
 
-      <SurpriseMe uncheckedIdeas={uncheckedIdeas} />
+      <SurpriseMe uncheckedIdeas={vibedUnchecked} />
 
       {/* Progress card */}
       <section className="mb-6 flex flex-wrap items-center gap-5 rounded-[22px] bg-ink p-6 text-cream">
@@ -105,10 +114,42 @@ export default async function Home() {
         </div>
       </section>
 
-      {!me.quizAnswers && (
-        <p className="mb-6 rounded-2xl border-[3px] border-dashed border-ink bg-white/60 p-4 text-center text-sm font-bold text-ink-soft">
-          ✨ Want this list ranked by your vibe? The vibe quiz is coming next.
-        </p>
+      {!hasVibe ? (
+        <Link
+          href="/quiz"
+          className="mb-6 block rounded-2xl border-[3px] border-dashed border-ink bg-white/60 p-4 text-center text-sm font-bold text-ink hover:bg-white"
+        >
+          ✨ Take the vibe quiz → get a list that actually sounds like you
+        </Link>
+      ) : (
+        <section className="mb-8">
+          <h3 className="mb-2 flex items-baseline gap-3 font-display text-2xl font-black">
+            <span className="inline-block -rotate-3 rounded-xl border-[3px] border-ink bg-coral px-2.5 py-0.5 text-white">
+              ✨
+            </span>
+            <span>For your vibe</span>
+            <small className="font-sans text-[0.85rem] font-bold uppercase tracking-wider text-ink-soft">
+              {vibeLabel}
+            </small>
+            <Link
+              href="/quiz"
+              className="ml-auto text-xs font-bold text-ink-soft underline hover:text-coral"
+            >
+              retake quiz
+            </Link>
+          </h3>
+          {forYou.length === 0 ? (
+            <p className="rounded-2xl border-[3px] border-dashed border-ink bg-white/60 p-4 text-center text-sm font-bold text-ink-soft">
+              🎉 You did everything matching your vibe. Iconic.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+              {forYou.map((idea) => (
+                <IdeaCard key={idea.key} idea={idea} checked={checked.has(idea.key)} />
+              ))}
+            </div>
+          )}
+        </section>
       )}
 
       {/* Categories */}
