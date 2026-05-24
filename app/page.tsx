@@ -6,6 +6,7 @@ import { CATEGORIES, IDEAS } from "@/lib/ideas";
 import { logoutAction } from "./_actions/account";
 import { AccountFlow } from "./_components/AccountFlow";
 import { IdeaCard } from "./_components/IdeaCard";
+import { SurpriseMe } from "./_components/SurpriseMe";
 
 export default async function Home() {
   const me = await getCurrentAccount();
@@ -38,6 +39,8 @@ export default async function Home() {
     .from(personalChecks)
     .where(eq(personalChecks.accountId, me.id));
   const checked = new Set(checkedRows.map((r) => r.ideaKey));
+
+  const uncheckedIdeas = IDEAS.filter((i) => !checked.has(i.key));
 
   const ideasByCategory = CATEGORIES.map((cat) => ({
     cat,
@@ -88,6 +91,8 @@ export default async function Home() {
             </p>
           )}
         </section>
+
+        <SurpriseMe uncheckedIdeas={uncheckedIdeas} />
 
         {ideasByCategory.map(({ cat, ideas }) => (
           <section key={cat.id} className="space-y-3">
