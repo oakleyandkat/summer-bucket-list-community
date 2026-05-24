@@ -99,6 +99,20 @@ export const personalChecks = pgTable(
   (t) => [primaryKey({ columns: [t.accountId, t.ideaKey] })]
 );
 
+// Which packs an account has unlocked. Pack metadata lives in lib/packs.ts
+// (it's product content, not user data) — we only track the unlock here.
+export const accountPacks = pgTable(
+  "account_pack",
+  {
+    accountId: text("account_id")
+      .notNull()
+      .references(() => accounts.id, { onDelete: "cascade" }),
+    packSlug: text("pack_slug").notNull(),
+    unlockedAt: timestamp("unlocked_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.accountId, t.packSlug] })]
+);
+
 // One photo per (account, idea). Re-uploading replaces. `photo` is a base64
 // data URL the client compresses before sending — keep it under ~1MB.
 export const memories = pgTable(

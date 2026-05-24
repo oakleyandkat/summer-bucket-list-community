@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/db/client";
 import { accounts, personalChecks } from "@/db/schema";
 import { IDEAS } from "@/lib/ideas";
+import { suggestIdea } from "@/lib/ai";
 import { getCurrentAccount } from "@/lib/session";
 
 const SPIN_COST = 10;
@@ -15,16 +16,18 @@ type RewardKind =
   | "mid"
   | "small"
   | "luckyPick"
-  | "compliment";
+  | "compliment"
+  | "aiPick";
 
 // Weights must sum to 100.
 const REWARDS: { kind: RewardKind; weight: number }[] = [
   { kind: "jackpot", weight: 5 },
   { kind: "big", weight: 5 },
-  { kind: "mid", weight: 30 },
-  { kind: "small", weight: 30 },
+  { kind: "mid", weight: 25 },
+  { kind: "small", weight: 25 },
   { kind: "luckyPick", weight: 15 },
   { kind: "compliment", weight: 15 },
+  { kind: "aiPick", weight: 10 },
 ];
 
 const COMPLIMENTS = [
@@ -47,7 +50,13 @@ export type SpinResult =
       idea: { key: string; emoji: string; text: string };
       balance: number;
     }
-  | { kind: "compliment"; message: string; balance: number };
+  | { kind: "compliment"; message: string; balance: number }
+  | {
+      kind: "aiPick";
+      idea: { emoji: string; text: string };
+      source: "claude" | "mock";
+      balance: number;
+    };
 
 function rollReward(): RewardKind {
   const r = Math.random() * 100;
@@ -110,6 +119,18 @@ export async function spinAction(): Promise<SpinResult | { error: string }> {
     return {
       kind: "luckyPick",
       idea: { key: idea.key, emoji: idea.emoji, text: idea.text },
+      balance,
+    };
+  }
+
+  if (kind === "aiPick") {
+    const suggestion = await suggestIdea(me.quizAnswers);
+    revalidatePath("/");
+    revalidatePath("/spin");
+    return {
+      kind: "aiPick",
+      idea: { emoji: suggestion.emoji, text: suggestion.text },
+      source: suggestion.source,
       balance,
     };
   }

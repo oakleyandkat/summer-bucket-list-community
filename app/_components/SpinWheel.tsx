@@ -12,6 +12,7 @@ const REWARD_LABELS: Record<SpinResult["kind"], string> = {
   small: "🌅 A little something",
   luckyPick: "🎟 Lucky pick",
   compliment: "💫 A note for you",
+  aiPick: "🔮 An idea just for you",
 };
 
 export function SpinWheel({ initialBalance }: { initialBalance: number }) {
@@ -125,6 +126,25 @@ export function SpinWheel({ initialBalance }: { initialBalance: number }) {
             <p className="mt-4 rounded-2xl border-[3px] border-dashed border-ink bg-white px-4 py-3 font-display text-xl font-black italic text-ink">
               {result.message}
             </p>
+          )}
+
+          {result.kind === "aiPick" && (
+            <div className="mt-4 rounded-2xl border-[3px] border-ink bg-white p-4">
+              <div className="text-xs font-black uppercase tracking-wider text-ink-soft">
+                custom for your vibe
+              </div>
+              <div className="mt-2 flex items-center justify-center gap-3 text-left">
+                <span className="text-3xl" aria-hidden>
+                  {result.idea.emoji}
+                </span>
+                <span className="font-bold text-ink">{result.idea.text}</span>
+              </div>
+              {result.source === "mock" && (
+                <div className="mt-3 rounded-lg border-2 border-dashed border-ink-soft bg-cream/50 px-2 py-1 text-[0.65rem] font-bold text-ink-soft">
+                  ⚙️ mock response — add ANTHROPIC_API_KEY in Suga to get real AI suggestions
+                </div>
+              )}
+            </div>
           )}
         </section>
       )}

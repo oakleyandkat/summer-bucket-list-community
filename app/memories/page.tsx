@@ -3,6 +3,12 @@ import { redirect } from "next/navigation";
 import { getMyMemories } from "../_actions/memory";
 import { getCurrentAccount } from "@/lib/session";
 import { IDEA_BY_KEY } from "@/lib/ideas";
+import { PACK_IDEA_BY_KEY, isPackIdeaKey } from "@/lib/packs";
+
+function resolveIdea(key: string) {
+  if (isPackIdeaKey(key)) return PACK_IDEA_BY_KEY[key]?.idea;
+  return IDEA_BY_KEY[key];
+}
 
 function formatDate(d: Date) {
   return d.toLocaleDateString(undefined, {
@@ -70,7 +76,7 @@ export default async function MemoriesPage() {
       ) : (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {rows.map((m) => {
-            const idea = IDEA_BY_KEY[m.ideaKey];
+            const idea = resolveIdea(m.ideaKey);
             return (
               <article
                 key={m.ideaKey}

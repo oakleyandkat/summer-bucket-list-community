@@ -3,8 +3,13 @@
 import { and, eq, gt, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db/client";
-import { accounts, memories, personalChecks } from "@/db/schema";
+import { accountPacks, accounts, memories, personalChecks } from "@/db/schema";
 import { IDEA_BY_KEY } from "@/lib/ideas";
+import {
+  PACK_IDEA_BY_KEY,
+  isPackIdeaKey,
+  packSlugFromIdeaKey,
+} from "@/lib/packs";
 import { getCurrentAccount } from "@/lib/session";
 
 const FARM_WINDOW_MINUTES = 10;
@@ -19,7 +24,19 @@ export async function toggleCheckAction(ideaKey: string): Promise<ToggleResult> 
   const me = await getCurrentAccount();
   if (!me) return { error: "Not signed in." };
 
-  if (!IDEA_BY_KEY[ideaKey]) return { error: "Unknown idea." };
+  if (isPackIdeaKey(ideaKey)) {
+    if (!PACK_IDEA_BY_KEY[ideaKey]) return { error: "Unknown idea." };
+    const slug = packSlugFromIdeaKey(ideaKey);
+    if (!slug) return { error: "Unknown idea." };
+    const owned = await db
+      .select({ packSlug: accountPacks.packSlug })
+      .from(accountPacks)
+      .where(and(eq(accountPacks.accountId, me.id), eq(accountPacks.packSlug, slug)))
+      .limit(1);
+    if (owned.length === 0) return { error: "You haven't unlocked that pack." };
+  } else if (!IDEA_BY_KEY[ideaKey]) {
+    return { error: "Unknown idea." };
+  }
 
   const existing = await db
     .select()
@@ -38,6 +55,7 @@ export async function toggleCheckAction(ideaKey: string): Promise<ToggleResult> 
       .where(and(eq(memories.accountId, me.id), eq(memories.ideaKey, ideaKey)));
     revalidatePath("/");
     revalidatePath("/memories");
+    revalidatePath("/packs");
     return { checked: false };
   }
 
@@ -76,5 +94,6 @@ export async function toggleCheckAction(ideaKey: string): Promise<ToggleResult> 
   }
 
   revalidatePath("/");
+  revalidatePath("/packs");
   return { checked: true, coinsEarned, antiFarmActive };
 }

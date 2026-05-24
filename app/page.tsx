@@ -4,9 +4,12 @@ import { db } from "@/db/client";
 import { accounts, memories, personalChecks } from "@/db/schema";
 import { getCurrentAccount } from "@/lib/session";
 import { CATEGORIES, IDEAS } from "@/lib/ideas";
+import { PACKS } from "@/lib/packs";
 import { describeVibe, moodProfileFromAnswers, sortByVibe } from "@/lib/quiz";
+import { getMyPackSlugs } from "./_actions/pack";
 import { logoutAction } from "./_actions/account";
 import { AccountFlow } from "./_components/AccountFlow";
+import { AskUniverse } from "./_components/AskUniverse";
 import { IdeaCard, type IdeaCardMemory } from "./_components/IdeaCard";
 import { SurpriseMe } from "./_components/SurpriseMe";
 
@@ -70,6 +73,9 @@ export default async function Home() {
     memoryRows.map((m) => [m.ideaKey, { photo: m.photo, caption: m.caption }])
   );
 
+  const myPackSlugs = await getMyPackSlugs();
+  const unlockedPacks = PACKS.filter((p) => myPackSlugs.has(p.slug));
+
   // Vibe-based ranking (if the user has taken the quiz)
   const profile = moodProfileFromAnswers(me.quizAnswers);
   const hasVibe = profile.size > 0;
@@ -104,9 +110,17 @@ export default async function Home() {
         >
           🎰 Spin the wheel ({me.coins} 🪙) →
         </Link>
+        <Link
+          href="/packs"
+          className="rounded-full border-2 border-ink bg-grass px-4 py-1.5 font-black text-ink shadow-chunky-sm transition hover:-translate-y-0.5"
+        >
+          📦 Packs ({unlockedPacks.length}/{PACKS.length}) →
+        </Link>
       </div>
 
       <SurpriseMe uncheckedIdeas={vibedUnchecked} />
+
+      <AskUniverse initialBalance={me.coins} />
 
       {/* Progress card */}
       <section className="mb-6 flex flex-wrap items-center gap-5 rounded-[22px] bg-ink p-6 text-cream">
@@ -188,6 +202,34 @@ export default async function Home() {
           )}
         </section>
       )}
+
+      {/* Unlocked themed packs */}
+      {unlockedPacks.map((pack) => (
+        <section key={pack.slug} className="mb-8">
+          <h3 className="mb-4 flex items-center gap-3 font-display text-2xl font-black">
+            <span
+              className="inline-block -rotate-3 rounded-xl border-[3px] border-ink px-2.5 py-0.5 text-[1.5rem]"
+              style={{ background: `var(--color-${pack.accent})` }}
+            >
+              {pack.emoji}
+            </span>
+            <span>{pack.name}</span>
+            <small className="font-sans text-[0.85rem] font-bold uppercase tracking-wider text-ink-soft">
+              pack · unlocked
+            </small>
+          </h3>
+          <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+            {pack.ideas.map((idea) => (
+              <IdeaCard
+                key={idea.key}
+                idea={idea}
+                checked={checked.has(idea.key)}
+                memory={memoryByKey.get(idea.key) ?? null}
+              />
+            ))}
+          </div>
+        </section>
+      ))}
 
       {/* Categories */}
       {CATEGORIES.map((cat) => {

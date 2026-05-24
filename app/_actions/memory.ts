@@ -5,7 +5,13 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/db/client";
 import { memories } from "@/db/schema";
 import { IDEA_BY_KEY } from "@/lib/ideas";
+import { PACK_IDEA_BY_KEY, isPackIdeaKey } from "@/lib/packs";
 import { getCurrentAccount } from "@/lib/session";
+
+function knownIdeaKey(key: string): boolean {
+  if (isPackIdeaKey(key)) return !!PACK_IDEA_BY_KEY[key];
+  return !!IDEA_BY_KEY[key];
+}
 
 const MAX_PHOTO_BYTES = 1_500_000; // ~1.5MB of base64 (~1.1MB raw)
 const MAX_CAPTION = 200;
@@ -23,7 +29,7 @@ export async function addMemoryAction(
 ): Promise<{ ok: true } | { error: string }> {
   const me = await getCurrentAccount();
   if (!me) return { error: "Not signed in." };
-  if (!IDEA_BY_KEY[ideaKey]) return { error: "Unknown idea." };
+  if (!knownIdeaKey(ideaKey)) return { error: "Unknown idea." };
 
   const photoError = validatePhoto(photo);
   if (photoError) return { error: photoError };
