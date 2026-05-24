@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "node scripts/migrate-prod.mjs && next start",
+    "start": "node scripts/migrate-prod.mjs || true; next start -p ${PORT:-3000}",
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrate-local.ts",
