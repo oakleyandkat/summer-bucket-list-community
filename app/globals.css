@@ -1,32 +1,111 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-sun: #FFD23F;
+  --color-sun-deep: #FFB627;
+  --color-sky: #6FD3E2;
+  --color-sky-deep: #2BB6CC;
+  --color-coral: #FF6B6B;
+  --color-coral-deep: #E64545;
+  --color-grass: #6FC97A;
+  --color-cream: #FFF7E8;
+  --color-ink: #2A2A3C;
+  --color-ink-soft: #5A5A72;
+  --color-lazy: #C5B6FF;
+  --color-romantic: #FFB3C7;
+  --color-active-mood: #FFAB5C;
+  --color-cozy-mood: #D7C0A5;
+
+  --font-sans: var(--font-nunito);
+  --font-display: var(--font-fraunces);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html, body {
+  color: var(--color-ink);
+  line-height: 1.5;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(circle at 10% 8%, rgba(255, 210, 63, 0.35), transparent 40%),
+    radial-gradient(circle at 90% 4%, rgba(111, 211, 226, 0.35), transparent 35%),
+    radial-gradient(circle at 50% 100%, rgba(255, 107, 107, 0.18), transparent 50%),
+    var(--color-cream);
+  min-height: 100vh;
 }
 
+/* —————— Floating background blobs —————— */
+.blob {
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.7;
+  animation: float 12s ease-in-out infinite;
+}
+.blob-sun {
+  top: 6%; right: 4%;
+  width: 140px; height: 140px;
+  background: var(--color-sun);
+  border-radius: 50%;
+  box-shadow: 0 0 80px rgba(255, 210, 63, 0.5);
+}
+.blob-cloud-1 {
+  top: 22%; left: -40px;
+  width: 180px; height: 60px;
+  background: white;
+  border-radius: 60px;
+  animation-duration: 18s;
+}
+.blob-cloud-2 {
+  top: 60%; right: -60px;
+  width: 220px; height: 70px;
+  background: white;
+  border-radius: 70px;
+  animation-duration: 22s;
+  animation-delay: -5s;
+  opacity: 0.5;
+}
+.blob-palm {
+  bottom: -20px; left: -30px;
+  font-size: 200px;
+  line-height: 1;
+  transform: rotate(-15deg);
+  animation: sway 8s ease-in-out infinite;
+  opacity: 0.18;
+}
+
+@media (max-width: 600px) {
+  .blob-sun { width: 90px; height: 90px; }
+  .blob-palm { font-size: 140px; }
+}
+
+/* —————— Keyframes —————— */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}
+@keyframes sway {
+  0%, 100% { transform: rotate(-15deg); }
+  50%      { transform: rotate(-8deg); }
+}
+@keyframes pop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  60%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1);   opacity: 1; }
+}
+@keyframes wobble {
+  0%, 100% { transform: rotate(0deg); }
+  25%      { transform: rotate(-3deg); }
+  75%      { transform: rotate(3deg); }
+}
 @keyframes popIn {
   0%   { transform: scale(0.85) rotate(-2deg); opacity: 0; }
   60%  { transform: scale(1.04) rotate(1deg);  opacity: 1; }
   100% { transform: scale(1)    rotate(0deg);  opacity: 1; }
 }
+
+/* —————— Utility-ish shorthands —————— */
+.font-display { font-family: var(--font-display); }
+.shadow-chunky    { box-shadow: 0 6px 0 var(--color-ink); }
+.shadow-chunky-sm { box-shadow: 0 4px 0 var(--color-ink); }
+.shadow-chunky-lg { box-shadow: 0 12px 0 rgba(42, 42, 60, 0.10); }

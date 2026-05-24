@@ -20,25 +20,41 @@ export function IdeaCard({ idea, checked }: { idea: Idea; checked: boolean }) {
       type="button"
       onClick={onClick}
       disabled={pending}
-      className={`group relative rounded-2xl border-2 border-slate-900 p-4 text-left shadow-[0_4px_0_theme(colors.slate.900)] transition hover:translate-y-[2px] hover:shadow-[0_2px_0_theme(colors.slate.900)] disabled:cursor-wait ${
-        optimisticChecked
-          ? "bg-emerald-100 line-through decoration-emerald-700 decoration-2"
-          : "bg-white"
+      className={`group flex items-start gap-3 rounded-2xl border-[3px] border-ink p-[18px] text-left shadow-chunky-sm transition hover:-translate-y-[3px] hover:rotate-[-0.5deg] disabled:cursor-wait ${
+        optimisticChecked ? "bg-cream opacity-65" : "bg-white"
       }`}
     >
-      <div className="flex items-start gap-3 pr-8">
-        <div className="text-3xl leading-none shrink-0" aria-hidden>
-          {idea.emoji}
-        </div>
-        <div className="flex-1 text-sm sm:text-base font-medium text-slate-900">
+      <div className="text-2xl leading-none shrink-0" aria-hidden>
+        {idea.emoji}
+      </div>
+      <div className="flex-1">
+        <div
+          className={`text-[1rem] font-bold ${
+            optimisticChecked
+              ? "line-through decoration-coral decoration-[3px]"
+              : ""
+          }`}
+        >
           {idea.text}
         </div>
-      </div>
-      {optimisticChecked && (
-        <div className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white text-sm font-bold shadow-[0_2px_0_theme(colors.slate.900)] border-2 border-slate-900">
-          ✓
+        <div className="mt-2 flex flex-wrap gap-1">
+          {idea.moods.map((m) => (
+            <span
+              key={m}
+              className="rounded-[10px] bg-cream px-2 py-0.5 text-[0.7rem] font-black lowercase text-ink-soft"
+            >
+              {m}
+            </span>
+          ))}
         </div>
-      )}
+      </div>
+      <div
+        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-[3px] border-ink text-base font-black text-ink ${
+          optimisticChecked ? "bg-grass animate-[wobble_0.5s_ease]" : "bg-white"
+        }`}
+      >
+        {optimisticChecked && "✓"}
+      </div>
     </button>
   );
 }

@@ -67,16 +67,15 @@ export function AccountFlow() {
     window.location.reload();
   }
 
-  // Avoid flash of wrong UI before localStorage check
   if (!mounted) {
-    return <div className="text-slate-500 text-sm">Loading…</div>;
+    return <div className="text-ink-soft text-sm">Loading…</div>;
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 text-left">
       {view === "picker" && (
         <div className="space-y-3">
-          <h2 className="text-xl font-semibold text-slate-900">Who&apos;s using this device?</h2>
+          <h2 className="font-display text-xl font-black">Who&apos;s using this device?</h2>
           {known.length > 0 ? (
             <ul className="space-y-2">
               {known.map((a) => (
@@ -88,7 +87,7 @@ export function AccountFlow() {
                       setError(null);
                       setView("pin");
                     }}
-                    className="w-full rounded-xl border-2 border-slate-900 bg-amber-100 px-4 py-3 text-left text-lg font-semibold text-slate-900 shadow-[0_4px_0_theme(colors.slate.900)] transition hover:translate-y-[2px] hover:shadow-[0_2px_0_theme(colors.slate.900)]"
+                    className="w-full rounded-2xl border-[3px] border-ink bg-sun px-4 py-3 text-left text-lg font-black text-ink shadow-chunky-sm transition hover:-translate-y-0.5"
                   >
                     {a.name}
                   </button>
@@ -96,7 +95,7 @@ export function AccountFlow() {
               ))}
             </ul>
           ) : (
-            <p className="text-slate-600">No accounts on this device yet.</p>
+            <p className="text-ink-soft">No accounts on this device yet.</p>
           )}
           <button
             type="button"
@@ -104,7 +103,7 @@ export function AccountFlow() {
               setError(null);
               setView("create");
             }}
-            className="text-sm font-medium text-rose-700 underline hover:text-rose-900"
+            className="text-sm font-bold text-coral underline hover:text-coral-deep"
           >
             + Create a new account
           </button>
@@ -113,11 +112,11 @@ export function AccountFlow() {
 
       {view === "pin" && selected && (
         <form action={onLogin} className="space-y-4">
-          <h2 className="text-xl font-semibold text-slate-900">
-            Welcome back, <span className="text-rose-600">{selected.name}</span>
+          <h2 className="font-display text-xl font-black">
+            Welcome back, <span className="text-coral">{selected.name}</span>
           </h2>
           <label className="block">
-            <span className="block text-sm font-medium text-slate-700">4-digit PIN</span>
+            <span className="block text-sm font-bold text-ink-soft">4-digit PIN</span>
             <input
               type="text"
               inputMode="numeric"
@@ -126,15 +125,15 @@ export function AccountFlow() {
               autoFocus
               required
               name="pin"
-              className="mt-1 w-full rounded-lg border-2 border-slate-900 bg-white px-4 py-3 text-2xl tracking-[0.5em] font-mono text-center text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-400"
+              className="mt-1 w-full rounded-xl border-[3px] border-ink bg-white px-4 py-3 text-2xl tracking-[0.5em] font-mono text-center text-ink focus:outline-none focus:ring-2 focus:ring-coral"
             />
           </label>
-          {error && <p className="text-sm font-medium text-rose-700">{error}</p>}
+          {error && <p className="text-sm font-bold text-coral-deep">{error}</p>}
           <div className="flex items-center gap-3">
             <button
               type="submit"
               disabled={pending}
-              className="rounded-xl border-2 border-slate-900 bg-rose-500 px-5 py-2.5 font-semibold text-white shadow-[0_4px_0_theme(colors.slate.900)] transition hover:translate-y-[2px] hover:shadow-[0_2px_0_theme(colors.slate.900)] disabled:opacity-60"
+              className="rounded-2xl border-[3px] border-ink bg-coral px-5 py-2.5 font-black text-white shadow-chunky-sm transition hover:-translate-y-0.5 disabled:opacity-60"
             >
               {pending ? "Checking…" : "Log in"}
             </button>
@@ -145,7 +144,7 @@ export function AccountFlow() {
                 setSelected(null);
                 setView("picker");
               }}
-              className="text-sm text-slate-600 underline"
+              className="text-sm text-ink-soft underline"
             >
               ← back
             </button>
@@ -155,9 +154,9 @@ export function AccountFlow() {
 
       {view === "create" && (
         <form action={onCreate} className="space-y-4">
-          <h2 className="text-xl font-semibold text-slate-900">Create your account</h2>
+          <h2 className="font-display text-xl font-black">Create your account</h2>
           <label className="block">
-            <span className="block text-sm font-medium text-slate-700">Your name</span>
+            <span className="block text-sm font-bold text-ink-soft">Your name</span>
             <input
               type="text"
               name="name"
@@ -165,12 +164,12 @@ export function AccountFlow() {
               maxLength={30}
               placeholder="e.g. Oakley"
               autoFocus
-              className="mt-1 w-full rounded-lg border-2 border-slate-900 bg-white px-4 py-3 text-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-400"
+              className="mt-1 w-full rounded-xl border-[3px] border-ink bg-white px-4 py-3 text-lg text-ink focus:outline-none focus:ring-2 focus:ring-coral"
             />
           </label>
           <label className="block">
-            <span className="block text-sm font-medium text-slate-700">
-              Pick a 4-digit PIN <span className="text-slate-500">(you&apos;ll use this to log in)</span>
+            <span className="block text-sm font-bold text-ink-soft">
+              Pick a 4-digit PIN <span className="text-ink-soft/70">(you&apos;ll use this to log in)</span>
             </span>
             <input
               type="text"
@@ -179,15 +178,15 @@ export function AccountFlow() {
               maxLength={4}
               required
               name="pin"
-              className="mt-1 w-full rounded-lg border-2 border-slate-900 bg-white px-4 py-3 text-2xl tracking-[0.5em] font-mono text-center text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-400"
+              className="mt-1 w-full rounded-xl border-[3px] border-ink bg-white px-4 py-3 text-2xl tracking-[0.5em] font-mono text-center text-ink focus:outline-none focus:ring-2 focus:ring-coral"
             />
           </label>
-          {error && <p className="text-sm font-medium text-rose-700">{error}</p>}
+          {error && <p className="text-sm font-bold text-coral-deep">{error}</p>}
           <div className="flex items-center gap-3">
             <button
               type="submit"
               disabled={pending}
-              className="rounded-xl border-2 border-slate-900 bg-emerald-500 px-5 py-2.5 font-semibold text-white shadow-[0_4px_0_theme(colors.slate.900)] transition hover:translate-y-[2px] hover:shadow-[0_2px_0_theme(colors.slate.900)] disabled:opacity-60"
+              className="rounded-2xl border-[3px] border-ink bg-grass px-5 py-2.5 font-black text-ink shadow-chunky-sm transition hover:-translate-y-0.5 disabled:opacity-60"
             >
               {pending ? "Creating…" : "Create account"}
             </button>
@@ -198,7 +197,7 @@ export function AccountFlow() {
                   setError(null);
                   setView("picker");
                 }}
-                className="text-sm text-slate-600 underline"
+                className="text-sm text-ink-soft underline"
               >
                 ← back
               </button>

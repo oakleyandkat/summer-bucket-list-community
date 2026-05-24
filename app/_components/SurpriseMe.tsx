@@ -7,7 +7,7 @@ import type { Idea } from "@/lib/ideas";
 export function SurpriseMe({ uncheckedIdeas }: { uncheckedIdeas: Idea[] }) {
   const [picked, setPicked] = useState<Idea | null>(null);
   const [pending, startTransition] = useTransition();
-  const [spinKey, setSpinKey] = useState(0); // forces animation re-trigger
+  const [spinKey, setSpinKey] = useState(0);
 
   function pickRandom(exclude?: string) {
     const pool = exclude
@@ -29,65 +29,58 @@ export function SurpriseMe({ uncheckedIdeas }: { uncheckedIdeas: Idea[] }) {
     });
   }
 
-  if (uncheckedIdeas.length === 0 && !picked) {
-    return (
-      <div className="rounded-2xl border-2 border-slate-900 bg-emerald-100 p-5 text-center shadow-[0_4px_0_theme(colors.slate.900)]">
-        <p className="text-lg font-bold text-emerald-900">🎉 You did them ALL.</p>
-        <p className="text-sm text-emerald-800">Iconic summer. Make a new list?</p>
-      </div>
-    );
-  }
+  return (
+    <div className="mb-7 rounded-[28px] border-[3px] border-ink bg-white p-7 text-center shadow-chunky-lg">
+      <h2 className="font-display text-2xl font-black">🎲 Can&apos;t decide?</h2>
+      <p className="mt-1 text-[0.95rem] text-ink-soft">Let summer decide for you.</p>
 
-  if (!picked) {
-    return (
       <button
         type="button"
-        onClick={() => pickRandom()}
-        className="w-full rounded-2xl border-2 border-slate-900 bg-amber-300 px-6 py-5 text-xl font-bold text-slate-900 shadow-[0_6px_0_theme(colors.slate.900)] transition hover:translate-y-[3px] hover:shadow-[0_3px_0_theme(colors.slate.900)] active:translate-y-[5px] active:shadow-[0_1px_0_theme(colors.slate.900)]"
+        onClick={() => pickRandom(picked?.key)}
+        disabled={pending || uncheckedIdeas.length === 0}
+        className="mt-5 inline-flex items-center gap-2.5 rounded-[18px] border-[3px] border-ink bg-coral px-7 py-3.5 text-[1.1rem] font-black text-white shadow-[0_6px_0_var(--color-ink)] transition hover:-translate-y-0.5 hover:shadow-[0_8px_0_var(--color-ink)] active:translate-y-1 active:shadow-[0_2px_0_var(--color-ink)] disabled:opacity-50"
       >
-        🎲 Surprise me with one
+        <span>{picked ? "🎲" : "🍦"}</span>
+        <span>{picked ? "Surprise me again" : "Surprise me"}</span>
       </button>
-    );
-  }
 
-  return (
-    <div
-      key={spinKey}
-      className="rounded-2xl border-2 border-slate-900 bg-gradient-to-br from-amber-200 to-rose-200 p-5 shadow-[0_6px_0_theme(colors.slate.900)] animate-[popIn_0.3s_ease-out]"
-    >
-      <p className="text-xs font-semibold uppercase tracking-wider text-rose-700">
-        Tonight&apos;s mission
-      </p>
-      <div className="mt-2 flex items-start gap-3">
-        <div className="text-5xl leading-none" aria-hidden>
-          {picked.emoji}
-        </div>
-        <p className="flex-1 text-xl font-semibold text-slate-900">{picked.text}</p>
-      </div>
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={markDone}
-          disabled={pending}
-          className="rounded-xl border-2 border-slate-900 bg-emerald-500 px-4 py-2 text-sm font-bold text-white shadow-[0_4px_0_theme(colors.slate.900)] transition hover:translate-y-[2px] hover:shadow-[0_2px_0_theme(colors.slate.900)] disabled:opacity-60"
-        >
-          {pending ? "Saving…" : "✓ I did it!"}
-        </button>
-        <button
-          type="button"
-          onClick={() => pickRandom(picked.key)}
-          disabled={pending}
-          className="rounded-xl border-2 border-slate-900 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-[0_4px_0_theme(colors.slate.900)] transition hover:translate-y-[2px] hover:shadow-[0_2px_0_theme(colors.slate.900)] disabled:opacity-60"
-        >
-          🎲 Try another
-        </button>
-        <button
-          type="button"
-          onClick={() => setPicked(null)}
-          className="text-sm text-slate-600 underline ml-1"
-        >
-          maybe later
-        </button>
+      <div
+        key={spinKey}
+        className={`mt-6 min-h-[80px] rounded-[18px] border-2 border-dashed border-ink bg-cream p-6 ${
+          picked ? "animate-[pop_0.4s_ease-out]" : ""
+        }`}
+      >
+        {picked ? (
+          <>
+            <div className="flex items-center justify-center gap-2 font-display text-[1.5rem] font-bold">
+              <span className="text-[2rem]" aria-hidden>{picked.emoji}</span>
+              <span>{picked.text}</span>
+            </div>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={markDone}
+                disabled={pending}
+                className="inline-flex items-center gap-1.5 rounded-2xl border-[3px] border-ink bg-grass px-4 py-2 text-sm font-black text-ink shadow-[0_4px_0_var(--color-ink)] transition hover:-translate-y-0.5 hover:shadow-[0_5px_0_var(--color-ink)] active:translate-y-0.5 active:shadow-[0_2px_0_var(--color-ink)] disabled:opacity-60"
+              >
+                {pending ? "Saving…" : "✓ Done it!"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setPicked(null)}
+                className="text-sm text-ink-soft underline"
+              >
+                maybe later
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="font-sans italic text-[1.1rem] font-normal text-ink-soft">
+            {uncheckedIdeas.length === 0
+              ? "🎉 You did them ALL. Iconic."
+              : "Tap the button — get a random thing to do."}
+          </div>
+        )}
       </div>
     </div>
   );
