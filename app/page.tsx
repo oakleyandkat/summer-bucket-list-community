@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
-import { accounts, personalChecks } from "@/db/schema";
+import { accounts, memories, personalChecks } from "@/db/schema";
 import { getCurrentAccount } from "@/lib/session";
 import { CATEGORIES, IDEAS } from "@/lib/ideas";
 import { describeVibe, moodProfileFromAnswers, sortByVibe } from "@/lib/quiz";
 import { logoutAction } from "./_actions/account";
 import { AccountFlow } from "./_components/AccountFlow";
-import { IdeaCard } from "./_components/IdeaCard";
+import { IdeaCard, type IdeaCardMemory } from "./_components/IdeaCard";
 import { SurpriseMe } from "./_components/SurpriseMe";
 
 function Hero() {
@@ -58,6 +58,18 @@ export default async function Home() {
   const unchecked = IDEAS.filter((i) => !checked.has(i.key));
   const pct = Math.round((checked.size / IDEAS.length) * 100);
 
+  const memoryRows = await db
+    .select({
+      ideaKey: memories.ideaKey,
+      photo: memories.photo,
+      caption: memories.caption,
+    })
+    .from(memories)
+    .where(eq(memories.accountId, me.id));
+  const memoryByKey = new Map<string, IdeaCardMemory>(
+    memoryRows.map((m) => [m.ideaKey, { photo: m.photo, caption: m.caption }])
+  );
+
   // Vibe-based ranking (if the user has taken the quiz)
   const profile = moodProfileFromAnswers(me.quizAnswers);
   const hasVibe = profile.size > 0;
@@ -80,6 +92,18 @@ export default async function Home() {
         >
           👯 Group rooms →
         </Link>
+        <Link
+          href="/memories"
+          className="rounded-full border-2 border-ink bg-coral px-4 py-1.5 font-black text-white shadow-chunky-sm transition hover:-translate-y-0.5"
+        >
+          🌅 Memory book →
+        </Link>
+        <Link
+          href="/spin"
+          className="rounded-full border-2 border-ink bg-sun px-4 py-1.5 font-black text-ink shadow-chunky-sm transition hover:-translate-y-0.5"
+        >
+          🎰 Spin the wheel ({me.coins} 🪙) →
+        </Link>
       </div>
 
       <SurpriseMe uncheckedIdeas={vibedUnchecked} />
@@ -101,6 +125,14 @@ export default async function Home() {
         <div className="text-[0.95rem] font-bold opacity-85">
           {pct}% of the list ({checked.size}/{IDEAS.length})
         </div>
+        <Link
+          href="/spin"
+          className="flex items-center gap-2 rounded-xl border-2 border-sun bg-sun/10 px-3 py-1.5 text-sm font-black text-sun transition hover:bg-sun hover:text-ink"
+          aria-label="Spin the wheel"
+        >
+          <span className="text-base">🪙</span>
+          <span>{me.coins}</span>
+        </Link>
         <div className="ml-auto flex items-center gap-3">
           <span className="text-sm opacity-80">Hey {me.name}</span>
           <form action={logoutAction}>
@@ -145,7 +177,12 @@ export default async function Home() {
           ) : (
             <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
               {forYou.map((idea) => (
-                <IdeaCard key={idea.key} idea={idea} checked={checked.has(idea.key)} />
+                <IdeaCard
+                  key={idea.key}
+                  idea={idea}
+                  checked={checked.has(idea.key)}
+                  memory={memoryByKey.get(idea.key) ?? null}
+                />
               ))}
             </div>
           )}
@@ -168,7 +205,12 @@ export default async function Home() {
             </h3>
             <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
               {ideas.map((idea) => (
-                <IdeaCard key={idea.key} idea={idea} checked={checked.has(idea.key)} />
+                <IdeaCard
+                  key={idea.key}
+                  idea={idea}
+                  checked={checked.has(idea.key)}
+                  memory={memoryByKey.get(idea.key) ?? null}
+                />
               ))}
             </div>
           </section>

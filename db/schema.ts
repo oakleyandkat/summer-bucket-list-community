@@ -5,6 +5,7 @@ import {
   primaryKey,
   uniqueIndex,
   jsonb,
+  integer,
 } from "drizzle-orm/pg-core";
 
 export type QuizAnswers = {
@@ -23,6 +24,7 @@ export const accounts = pgTable("account", {
   name: text("name").notNull(),
   pinHash: text("pin_hash").notNull(),
   quizAnswers: jsonb("quiz_answers").$type<QuizAnswers>(),
+  coins: integer("coins").default(0).notNull(),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
 });
 
@@ -92,6 +94,23 @@ export const personalChecks = pgTable(
       .references(() => accounts.id, { onDelete: "cascade" }),
     ideaKey: text("idea_key").notNull(),
     checkedAt: timestamp("checked_at", { mode: "date" }).defaultNow().notNull(),
+    coinsAwarded: integer("coins_awarded").default(0).notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.accountId, t.ideaKey] })]
+);
+
+// One photo per (account, idea). Re-uploading replaces. `photo` is a base64
+// data URL the client compresses before sending — keep it under ~1MB.
+export const memories = pgTable(
+  "memory",
+  {
+    accountId: text("account_id")
+      .notNull()
+      .references(() => accounts.id, { onDelete: "cascade" }),
+    ideaKey: text("idea_key").notNull(),
+    photo: text("photo").notNull(),
+    caption: text("caption"),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   },
   (t) => [primaryKey({ columns: [t.accountId, t.ideaKey] })]
 );

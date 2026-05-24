@@ -32,6 +32,7 @@ export async function getCurrentAccount() {
       id: accounts.id,
       name: accounts.name,
       quizAnswers: accounts.quizAnswers,
+      coins: accounts.coins,
     })
     .from(accounts)
     .where(eq(accounts.id, id))
