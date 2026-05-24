@@ -33,7 +33,7 @@ export async function createRoomAction(formData: FormData): Promise<Ok<{ code: s
       const [row] = await db
         .insert(rooms)
         .values({ code, name, ownerId: me.id })
-        .returning({ id: rooms.id, code: rooms.code });
+        .returning();
       await db
         .insert(roomMembers)
         .values({ roomId: row.id, accountId: me.id })
@@ -166,7 +166,7 @@ export async function suggestIdeaAction(
   const [row] = await db
     .insert(suggestions)
     .values({ roomId, text, emoji, authorId: me.id })
-    .returning({ id: suggestions.id });
+    .returning();
 
   revalidatePath("/rooms", "layout");
   return { ok: true, data: { id: row.id } };

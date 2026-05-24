@@ -22,11 +22,11 @@ export async function createAccountAction(formData: FormData): Promise<Result<{ 
   const [row] = await db
     .insert(accounts)
     .values({ name, pinHash })
-    .returning({ id: accounts.id, name: accounts.name });
+    .returning();
 
   await setSession(row.id);
   revalidatePath("/");
-  return { ok: true, data: row };
+  return { ok: true, data: { id: row.id, name: row.name } };
 }
 
 export async function loginAction(formData: FormData): Promise<Result<{ id: string; name: string }>> {
